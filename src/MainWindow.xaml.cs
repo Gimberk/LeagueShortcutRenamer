@@ -1,33 +1,60 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using LSR.src;
+using System;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 
-namespace LSR
-{
+namespace LSR {
+    enum ShortcutFormat {
+        None, LP, MOTD
+    }
+
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
-    public partial class MainWindow : Window
-    {
-        public MainWindow()
-        {
+    public partial class MainWindow : Window {
+        ShortcutFormat currentFormat;
+        Window1 selectPathWindow;
+
+        public MainWindow() {
             InitializeComponent();
+
+            // Run the initialization set ups
+            this.Loaded += Main_Win_Loaded;
         }
 
-        private void Button_Click(object sender, RoutedEventArgs e)
-        {
-            Console.WriteLine("HELLO WORLD");
+        private void Main_Win_Loaded(object sender, RoutedEventArgs e) {
+            currentFormat = ShortcutFormat.None;
+
+            selectPathWindow = new Window1
+            {
+                Owner = this
+            };
+        }
+
+        private void Current_Checked(object sender, RoutedEventArgs e) {
+            if (sender is RadioButton button) {
+                switch (button.Name) {
+                    case "LP":
+                        currentFormat = ShortcutFormat.LP;
+                        break;
+                    case "MOTD":
+                        currentFormat = ShortcutFormat.MOTD;
+                        break;
+                    case "None":
+                        currentFormat = ShortcutFormat.None;
+                        break;
+                    default:
+                        MessageBox.Show("Tried to set an invalid shortcut format state; choose one of: NONE, LP, MOTD",
+                            "Invalid Format State",
+                            MessageBoxButton.OK, MessageBoxImage.Error);
+                        currentFormat = ShortcutFormat.None;
+                        break;
+                }
+            }
+        }
+
+        private void SelectPaths_Click(object sender, RoutedEventArgs e) {
+            selectPathWindow.Show();
         }
     }
 }

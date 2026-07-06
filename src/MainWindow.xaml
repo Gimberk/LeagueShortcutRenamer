@@ -5,14 +5,16 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:LSR"
         mc:Ignorable="d"
-        Title="League Shortcut Renamer" Height="450" Width="827" Background="#FF333333">
+        Title="League Shortcut Renamer" Height="450" Width="827" Background="#FF333333" ResizeMode="NoResize">
     <Grid Margin="0,0,0,-6">
         <Grid.ColumnDefinitions>
             <ColumnDefinition/>
         </Grid.ColumnDefinitions>
         <Label x:Name="Title" Content="Welcome to the League Shortcut Renamer!" Margin="0,16,0,0" FontSize="36" Foreground="#FF9149FF" FontFamily="Franklin Gothic Medium" HorizontalAlignment="Center" VerticalAlignment="Top"/>
-        <Label Content="Select a Shortcut Format:" Margin="27,81,0,0" FontSize="24" Foreground="#FF969696" FontFamily="Franklin Gothic Medium" HorizontalAlignment="Left" VerticalAlignment="Top"/>
-        <RadioButton x:Name="Current" Content="Current LP" HorizontalAlignment="Left" Margin="27,118,0,0" VerticalAlignment="Top" Width="97" Background="#FFC8C8C8" Foreground="White" BorderBrush="Red" FontFamily="Franklin Gothic Medium" FontSize="16" IsChecked="True"/>
-        <RadioButton x:Name="MOTD" Content="Message of the Day from Yours Truly" HorizontalAlignment="Left" Margin="27,138,0,0" VerticalAlignment="Top" Width="272" Background="#FFC8C8C8" Foreground="White" BorderBrush="Red" FontFamily="Franklin Gothic Medium" FontSize="16"/>
+        <Button x:Name="SelectPaths" Content="Select Necessary Paths" Margin="27,86,0,0" Click="SelectPaths_Click" Width="152" Height="34" VerticalAlignment="Top" HorizontalAlignment="Left"/>
+        <Label Content="Select a Shortcut Format:" Margin="27,141,0,0" FontSize="24" Foreground="#FF969696" FontFamily="Franklin Gothic Medium" HorizontalAlignment="Left" VerticalAlignment="Top" IsEnabled="False"/>
+        <RadioButton x:Name="LP" Content="Current LP" HorizontalAlignment="Left" Margin="27,178,0,0" VerticalAlignment="Top" Width="97" Background="Red" Foreground="White" BorderBrush="Red" FontFamily="Franklin Gothic Medium" FontSize="16" IsChecked="False" Checked="Current_Checked" IsEnabled="False"/>
+        <RadioButton x:Name="MOTD" Content="Message of the Day from Yours Truly" HorizontalAlignment="Left" Margin="27,198,0,0" VerticalAlignment="Top" Width="272" Background="#FFC8C8C8" Foreground="White" BorderBrush="Red" FontFamily="Franklin Gothic Medium" FontSize="16" Checked="Current_Checked" IsEnabled="False"/>
+        <RadioButton x:Name="None" Content="None (Sets Off)" HorizontalAlignment="Left" Margin="27,220,0,0" VerticalAlignment="Top" Width="272" Background="#FFC8C8C8" Foreground="White" BorderBrush="Red" FontFamily="Franklin Gothic Medium" FontSize="16" Checked="Current_Checked" IsEnabled="False"/>
     </Grid>
 </Window>
