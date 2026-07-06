@@ -1,5 +1,6 @@
 ﻿using LSR.src;
 using System;
+using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 
@@ -17,6 +18,10 @@ namespace LSR {
 
         public MainWindow() {
             InitializeComponent();
+
+            string pwd = Directory.GetCurrentDirectory();
+            if (!Directory.Exists(pwd + @"\config")) Directory.CreateDirectory(pwd + @"\config");
+            Console.WriteLine(pwd + @"\config");
 
             // Run the initialization set ups
             this.Loaded += Main_Win_Loaded;
@@ -54,7 +59,7 @@ namespace LSR {
         }
 
         private void SelectPaths_Click(object sender, RoutedEventArgs e) {
-            selectPathWindow.Show();
+            selectPathWindow.ShowDialog();
         }
     }
 }

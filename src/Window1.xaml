@@ -10,6 +10,23 @@
         <Grid.ColumnDefinitions>
             <ColumnDefinition/>
         </Grid.ColumnDefinitions>
+        <TextBox x:Name="ExecPathTxt" TextWrapping="Wrap" Margin="102,171,0,0" Text="League Executable Path" FontSize="18" HorizontalAlignment="Left" VerticalAlignment="Top" Height="30" Width="232" FontFamily="Segoe UI"/>
+        <TextBox x:Name="ShortcutPathTxt" TextWrapping="Wrap" Margin="102,69,0,0" Text="League Shortcut Path" FontSize="18" VerticalAlignment="Top" HorizontalAlignment="Left" Width="232" RenderTransformOrigin="0.5,0.5" Height="30">
+            <TextBox.RenderTransform>
+                <TransformGroup>
+                    <ScaleTransform/>
+                    <SkewTransform AngleX="0"/>
+                    <RotateTransform/>
+                    <TranslateTransform X="0"/>
+                </TransformGroup>
+            </TextBox.RenderTransform>
+        </TextBox>
+        <Label Content="OR" Margin="0,118,0,0" Background="Transparent" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Top" FontFamily="Franklin Gothic Medium" FontSize="24" RenderTransformOrigin="0.581,0.139"/>
+        <Button x:Name="ShortcutBrowseBtn" Content="Browse" HorizontalAlignment="Left" VerticalAlignment="Top" Height="30" Width="50" Margin="339,69,0,0" Click="ShortcutBrowseBtn_Click"/>
+        <Button x:Name="ExecBrowseBtn" Content="Browse" Margin="339,171,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" Height="30" Width="50" Click="ExecBrowseBtn_Click"/>
+        <Button x:Name="SaveBtn" Content="Save" Margin="102,258,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" Height="48" Width="287" FontSize="26" Click="SaveBtn_Click"/>
+        <Label Content="?" Foreground="White" Margin="72,167,0,0" FontFamily="Franklin Gothic Medium" FontSize="24" HorizontalAlignment="Left" VerticalAlignment="Top" MouseEnter="Label_MouseEnter"/>
+        <Label Content="?" Foreground="White" Margin="72,65,0,0" FontFamily="Franklin Gothic Medium" FontSize="24" HorizontalAlignment="Left" VerticalAlignment="Top" MouseEnter="Label_MouseEnter_1"/>
 
     </Grid>
 </Window>
