@@ -5,30 +5,34 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:LSR.src"
         mc:Ignorable="d"
-        Title="Select Shortcut Path" Height="401" Width="468" Background="#FF333333" WindowStartupLocation="CenterOwner" ResizeMode="NoResize" Closing="SelectShortcutPath_Closing">
+        Title="Settings" Height="401" Width="468" Background="#FF333333" WindowStartupLocation="CenterOwner" ResizeMode="NoResize" Closing="SelectShortcutPath_Closing">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition/>
         </Grid.ColumnDefinitions>
-        <TextBox x:Name="ExecPathTxt" TextWrapping="Wrap" Margin="102,171,0,0" Text="League Executable Path" FontSize="18" HorizontalAlignment="Left" VerticalAlignment="Top" Height="30" Width="197" FontFamily="Segoe UI"/>
-        <TextBox x:Name="ShortcutPathTxt" TextWrapping="Wrap" Margin="102,69,0,0" Text="League Shortcut Path" FontSize="18" VerticalAlignment="Top" HorizontalAlignment="Left" Width="197" RenderTransformOrigin="0.5,0.5" Height="30">
+        <TextBox x:Name="ExecPathTxt" TextWrapping="Wrap" Margin="102,171,0,0" Text="League Executable Path" FontSize="18" HorizontalAlignment="Left" VerticalAlignment="Top" Height="30" Width="197" FontFamily="Segoe UI" TabIndex="3" TextChanged="TextBoxContentChanged" VerticalContentAlignment="Center"/>
+        <TextBox x:Name="ShortcutPathTxt" TextWrapping="Wrap" Margin="102,69,0,0" Text="League Shortcut Path" FontSize="18" VerticalAlignment="Top" HorizontalAlignment="Left" Width="197" RenderTransformOrigin="0.5,0.5" Height="30" TabIndex="0" TextChanged="TextBoxContentChanged" VerticalContentAlignment="Center" VerticalScrollBarVisibility="Disabled" ScrollViewer.CanContentScroll="True" HorizontalScrollBarVisibility="Auto">
             <TextBox.RenderTransform>
                 <TransformGroup>
                     <ScaleTransform/>
                     <SkewTransform AngleX="0"/>
-                    <RotateTransform Angle="0.022"/>
+                    <RotateTransform Angle="0.0"/>
                     <TranslateTransform X="0"/>
                 </TransformGroup>
             </TextBox.RenderTransform>
         </TextBox>
         <Label Content="OR" Margin="0,118,0,0" Background="Transparent" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Top" FontFamily="Franklin Gothic Medium" FontSize="24" RenderTransformOrigin="0.581,0.139"/>
-        <Button x:Name="ShortcutBrowseBtn" Content="Browse" HorizontalAlignment="Left" VerticalAlignment="Top" Height="30" Width="50" Margin="304,69,0,0" Click="ShortcutBrowseBtn_Click"/>
-        <Button x:Name="ExecBrowseBtn" Content="Browse" Margin="304,171,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" Height="30" Width="50" Click="ExecBrowseBtn_Click"/>
-        <Button x:Name="SaveBtn" Content="Save" Margin="102,258,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" Height="48" Width="287" FontSize="26" Click="SaveBtn_Click"/>
+        <Button x:Name="ShortcutBrowseBtn" Content="Browse" HorizontalAlignment="Left" VerticalAlignment="Top" Height="30" Width="50" Margin="304,69,0,0" Click="ShortcutBrowseBtn_Click" TabIndex="1"/>
+        <Button x:Name="ExecBrowseBtn" Content="Browse" Margin="304,171,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" Height="30" Width="50" Click="ExecBrowseBtn_Click" TabIndex="4"/>
+        <Button x:Name="SaveBtn" Content="Save" HorizontalAlignment="Center" VerticalAlignment="Bottom" Height="48" Width="288" FontSize="26" Click="SaveBtn_Click" TabIndex="6" Padding="1,1,1,1" Margin="0,0,0,0"/>
         <Label Content="?" Foreground="White" Margin="72,167,0,0" FontFamily="Franklin Gothic Medium" FontSize="24" HorizontalAlignment="Left" VerticalAlignment="Top" ToolTip="Select the RiotClientServices.exe file. Usually found under C:\Riot Games\Riot Client\RiotClientServices.exe" ToolTipService.InitialShowDelay="250"/>
         <Label Content="?" Foreground="White" Margin="72,65,0,0" FontFamily="Franklin Gothic Medium" FontSize="24" HorizontalAlignment="Left" VerticalAlignment="Top" ToolTip="Select the shortcut file in your desktop. If you do not have one, leave this blank and fill in the next text box." ToolTipService.InitialShowDelay="250"/>
-        <Button x:Name="CreateShortcut" Content="Create" Margin="359,171,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" Height="30" Width="50" Click="CreateShortcut_Click" BorderBrush="#FF941EFF"/>
-        <Button x:Name="DetectBtn" Content="Detect" Margin="359,69,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" Height="30" Width="50" BorderBrush="#FF941EE1" Click="DetectBtn_Click"/>
+        <Button x:Name="CreateShortcut" Content="Create" Margin="359,171,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" Height="30" Width="50" Click="CreateShortcut_Click" BorderBrush="#FF941EFF" TabIndex="5"/>
+        <Button x:Name="DetectBtn" Content="Detect" Margin="359,69,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" Height="30" Width="50" BorderBrush="#FF941EE1" Click="DetectBtn_Click" TabIndex="2"/>
+        <TextBox x:Name="UserTxt" TextWrapping="Wrap" Text="League Username" Margin="34,242,0,0" TextChanged="TextBoxContentChanged" Width="264" Height="23" HorizontalAlignment="Left" VerticalAlignment="Top" VerticalContentAlignment="Center" MaxHeight="23" MaxWidth="264" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled"/>
+        <TextBox x:Name="TagTxt" TextWrapping="Wrap" Text="Tagline" Margin="329,242,0,0" TextChanged="TextBoxContentChanged" VerticalContentAlignment="Center" VerticalScrollBarVisibility="Disabled" Width="114" Height="24" MaxWidth="114" MaxHeight="24.04" HorizontalAlignment="Left" VerticalAlignment="Top"/>
+        <Label Content="#" Foreground="White" HorizontalAlignment="Left" VerticalAlignment="Top" Width="23" Height="30" Margin="301,236,0,0" FontSize="18" VerticalContentAlignment="Center" HorizontalContentAlignment="Center"/>
+        <TextBox x:Name="APIKeyTxt" TextWrapping="Wrap" Text="API Key" Margin="34,279,0,0" VerticalContentAlignment="Center" VerticalScrollBarVisibility="Disabled" Width="409" Height="25" HorizontalAlignment="Left" VerticalAlignment="Top"/>
 
     </Grid>
 </Window>

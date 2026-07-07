@@ -23,6 +23,8 @@ namespace LSR {
         Window1 selectPathWindow;
 
         public readonly string configFile;
+        public readonly string playerFile;
+
         private bool running = false;
         private bool leagueRunning = false;
 
@@ -92,8 +94,12 @@ namespace LSR {
 
             // locate or create the config file for paths
             string pwd = Directory.GetCurrentDirectory();
-            if (!Directory.Exists(pwd + @"\config")) Directory.CreateDirectory(pwd + @"\config");
+            if (!Directory.Exists(pwd + @"\config")) {
+                Directory.CreateDirectory(pwd + @"\config");
+                ShowLegalBoilerplate();
+            }
             configFile = pwd + @"\config\paths.cfg";
+            playerFile = pwd + @"\config\player.cfg";
 
             // initiate the dispatch timer to check for league
             leagueTimer.Interval = TimeSpan.FromMinutes(2);
@@ -102,6 +108,15 @@ namespace LSR {
 
             // Run the initialization set ups
             this.Loaded += Main_Win_Loaded;
+        }
+
+        private bool IsPlayerInfoValid() {
+            if (!File.Exists(playerFile) || new FileInfo(playerFile).Length == 0) return false;
+            return File.ReadAllLines(playerFile)[0] == "True";
+        }
+
+        private void ShowLegalBoilerplate() {
+            MessageBox.Show("League Shortcut Renamer is not endorsed by Riot Games and does not reflect the views or opinions of Riot Games or anyone officially involved in producing or managing Riot Games properties. Riot Games and all associated properties are trademarks or registered trademarks of Riot Games, Inc", "Legal Jibber Jabber", MessageBoxButton.OK, MessageBoxImage.Information);
         }
 
         private void ClearWorkingDirectory()
@@ -116,20 +131,31 @@ namespace LSR {
         private void UpdatePathLbl() {
             if (new FileInfo(configFile).Length == 0) return;
 
-            string path = File.ReadLines(configFile).ToArray()[0];
+            string path = File.ReadAllLines(configFile).ToArray()[0];
             PathLbl.Content = path;
+        }
+
+        private void UpdatePlayerLbl() {
+            bool valid = IsPlayerInfoValid();
+            LP.IsEnabled = valid;
+            SignedInLbl.Content = valid ? $"Signed in as: {File.ReadAllLines(playerFile)[1]}#{File.ReadAllLines(playerFile)[2]}" : string.Empty;
         }
 
         private void Main_Win_Loaded(object sender, RoutedEventArgs e) {
             currentFormat = ShortcutFormat.None;
 
-            selectPathWindow = new Window1(configFile)
+            LP.IsEnabled = IsPlayerInfoValid();
+
+            selectPathWindow = new Window1(configFile, playerFile)
             {
                 Owner = this
             };
 
             if (!File.Exists(configFile)) File.Create(configFile);
             else UpdatePathLbl();
+
+            if (!File.Exists(playerFile)) File.Create(playerFile);
+            UpdatePlayerLbl();
         }
 
         private void Current_Checked(object sender, RoutedEventArgs e) {
@@ -158,6 +184,7 @@ namespace LSR {
             selectPathWindow.ShowDialog();
 
             UpdatePathLbl();
+            UpdatePlayerLbl();
         }
 
         private void EnableBtn_Click(object sender, RoutedEventArgs e)
@@ -191,6 +218,10 @@ namespace LSR {
             LP.IsEnabled = true;
             MOTD.IsEnabled = true;
             None.IsEnabled = true;
+        }
+
+        private void ShowLegalBtn_Click(object sender, RoutedEventArgs e) {
+            ShowLegalBoilerplate();
         }
     }
 }

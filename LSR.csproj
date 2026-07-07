@@ -39,8 +39,12 @@
       <HintPath>packages\Interop.IWshRuntimeLibrary.1.0.1\lib\net45\Interop.IWshRuntimeLibrary.dll</HintPath>
       <EmbedInteropTypes>True</EmbedInteropTypes>
     </Reference>
+    <Reference Include="Newtonsoft.Json, Version=13.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>packages\Newtonsoft.Json.13.0.4\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
+    <Reference Include="System.Numerics" />
     <Reference Include="System.Xml" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Core" />
@@ -61,6 +65,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="src\tools\RiotAccountService.cs" />
     <Compile Include="src\tools\Utility.cs" />
     <Compile Include="src\Window1.xaml.cs">
       <DependentUpon>Window1.xaml</DependentUpon>

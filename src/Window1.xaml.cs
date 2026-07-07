@@ -14,16 +14,29 @@ namespace LSR.src {
         private static bool saved = false;
 
         private readonly string configFile;
+        private readonly string playerFile;
 
-        public Window1(string cfg) {
+        public Window1(string cfg, string playerInfo) {
             InitializeComponent();
 
-            configFile = cfg;
+            configFile  = cfg;
+            playerFile  = playerInfo;
 
             if (File.Exists(configFile) && new FileInfo(configFile).Length > 0) {
-                string[] lines = File.ReadLines(configFile).ToArray();
-                ShortcutPathTxt.Text = lines[0];
-                ExecPathTxt.Text = lines[1];
+                string[] lines = File.ReadAllLines(configFile).ToArray();
+
+                ShortcutPathTxt.Text    = lines[0];
+                ExecPathTxt.Text        = lines[1];
+            }
+
+            if (File.Exists(playerFile) && new FileInfo(playerFile).Length > 0) {
+                string[] lines = File.ReadAllLines(playerFile).ToArray();
+
+                if (lines[0] == "True") {
+                    UserTxt.Text = lines[1];
+                    TagTxt.Text = lines[2];
+                    APIKeyTxt.Text = lines[3];
+                }
             }
         }
 
@@ -42,11 +55,9 @@ namespace LSR.src {
             this.Hide();
         }
 
-        private void ShowWarning()
-        {
+        private void ShowWarning() {
             MessageBox.Show("You must set either the existing shortcut path or select the League executable path and hit \"Create\". If you're unsure, hover over the question marks for more information.",
                                 "Save Failed", MessageBoxButton.OK, MessageBoxImage.Warning);
-            return;
         }
 
         private void ShortcutBrowseBtn_Click(object sender, RoutedEventArgs e)
@@ -80,7 +91,7 @@ namespace LSR.src {
             }
         }
 
-        private void SaveBtn_Click(object sender, RoutedEventArgs e)
+        private async void SaveBtn_Click(object sender, RoutedEventArgs e)
         {
             string shortcut = ShortcutPathTxt.Text;
             string exec = ExecPathTxt.Text;
@@ -90,8 +101,49 @@ namespace LSR.src {
                 return;
             }
 
+            bool emptyPlayerInfo = false;
+            if (APIKeyTxt.Text == "API Key") {
+                emptyPlayerInfo = true;
+                MessageBoxResult result = MessageBox.Show("Some of your account information is missing or you've failed to provide the API Key. The option for your Current LP Will be disabled until your information is verified. Would you like to continue?",
+                    "Missing Information", MessageBoxButton.YesNo, MessageBoxImage.Warning);
+
+                if (result == MessageBoxResult.No) return;
+            }
+            if (UserTxt.Text == "League Username" && !emptyPlayerInfo) {
+                emptyPlayerInfo = true;
+                MessageBoxResult result = MessageBox.Show("Some of your account information is missing or you've failed to provide the API Key. The option for your Current LP Will be disabled until your information is verified. Would you like to continue?",
+                    "Missing Information", MessageBoxButton.YesNo, MessageBoxImage.Warning);
+
+                if (result == MessageBoxResult.No) return;
+            }
+            if (TagTxt.Text == "Tagline" && !emptyPlayerInfo) {
+                emptyPlayerInfo = true;
+                MessageBoxResult result = MessageBox.Show("Some of your account information is missing or you've failed to provide the API Key. The option for your Current LP Will be disabled until your information is verified. Would you like to continue?",
+                    "Missing Information", MessageBoxButton.YesNo, MessageBoxImage.Warning);
+
+                if (result == MessageBoxResult.No) return;
+            }
+
+            bool correctPlayerInfo = false;
+            if (!emptyPlayerInfo) {
+                try {
+                    RiotAccountService apiServicer = new RiotAccountService(APIKeyTxt.Text);
+                    string attemptedPUUID = await apiServicer.GetPUUID("Americas", UserTxt.Text, TagTxt.Text);
+                    if (attemptedPUUID.ToCharArray()[0] == 'e') {
+                        if (MessageBox.Show("Invalid UserID, Tagline, or API Key. Ensure they're correct. Would you like to continue regardless?", "Save Failure", MessageBoxButton.YesNo, MessageBoxImage.Warning) == MessageBoxResult.No) return;
+                    }
+                    else {
+                        correctPlayerInfo = true;
+                        MessageBox.Show("Successfully connected Riot account.", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
+                    }
+                }
+                catch {
+                    if (MessageBox.Show("Invalid UserID, Tagline, or API Key. Ensure they're correct. Would you like to continue regardless?", "Save Failure", MessageBoxButton.YesNo, MessageBoxImage.Warning) == MessageBoxResult.No) return;
+                }
+            }
 
             File.WriteAllText(configFile, shortcut + "\n" + exec);
+            File.WriteAllText(playerFile, correctPlayerInfo.ToString() + "\n" + UserTxt.Text + "\n" + TagTxt.Text + "\n" + APIKeyTxt.Text);
 
             saved = true;
             Hide();
@@ -140,6 +192,29 @@ namespace LSR.src {
                     MessageBox.Show("Successfully found League of Legends shortcut!", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
                     ShortcutPathTxt.Text = f;
                     break;
+                }
+            }
+        }
+
+        private void TextBoxContentChanged(object sender, TextChangedEventArgs e) {
+            if (sender is TextBox input) {
+                if (input.Text != string.Empty) return;
+                switch (input.Name) {
+                    case "UserTxt":
+                        input.Text = "League Username";
+                        break;
+                    case "TagTxt":
+                        input.Text = "Tagline";
+                        break;
+                    case "APIKeyTxt":
+                        input.Text = "API Key";
+                        break;
+                    case "ShortcutPathTxt":
+                        input.Text = "League Shortcut Path";
+                        break;
+                    case "ExecPathTxt":
+                        input.Text = "League Executable Path";
+                        break;
                 }
             }
         }
