@@ -1,6 +1,6 @@
 ﻿using Microsoft.Win32;
-using System;
 using System.IO;
+using System.Linq;
 using System.Windows;
 
 namespace LSR.src {
@@ -8,22 +8,33 @@ namespace LSR.src {
     /// Interaction logic for Window1.xaml
     /// </summary>
     public partial class Window1 : Window {
-        public static string shortcutPath, execPath;
         private static bool saved = false;
 
-        public Window1() {
+        private readonly string configFile;
+
+        public Window1(string cfg) {
             InitializeComponent();
+
+            configFile = cfg;
+
+            if (File.Exists(configFile)) {
+                string[] lines = File.ReadLines(configFile).ToArray();
+                ShortcutPathTxt.Text = lines[0];
+                ExecPathTxt.Text = lines[1];
+            }
         }
 
         // Handle to Hide instead of closing the window as there's only ever one instance of this window
         private void SelectShortcutPath_Closing(object sender, System.ComponentModel.CancelEventArgs e) {
             e.Cancel = true;
 
+            /*
             if (!saved)
             {
                 ShowWarning();
                 return;
             }
+            */
 
             this.Hide();
         }
@@ -68,8 +79,7 @@ namespace LSR.src {
                 return;
             }
 
-            if (File.Exists(shortcut)) shortcutPath = shortcut;
-            if (File.Exists(exec)) execPath = exec;
+            File.WriteAllText(configFile, shortcut + "\n" + exec);
 
             saved = true;
             Hide();
