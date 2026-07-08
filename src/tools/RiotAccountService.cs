@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json;
 using System;
+using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading.Tasks;
 
@@ -38,7 +39,7 @@ namespace LSR.src.tools {
                 else {
                     string error = await response.Content.ReadAsStringAsync();
 
-                    Console.WriteLine($"Status: {(int)response.StatusCode}");
+                    Console.WriteLine($"Status: {response.StatusCode}");
 
                     return $"e1 {response.StatusCode}: {error}";
                 }
@@ -49,6 +50,69 @@ namespace LSR.src.tools {
                 return "e2" + ex.Message;
             }
         }
+
+        /*
+         * Apparently an outdated form of identificaiton
+        public async Task<string> GetSummonerIdByPUUID(string puuid) {
+            string url = $"https://na1.api.riotgames.com/lol/summoner/v4/summoners/by-puuid/{puuid}";
+
+            HttpResponseMessage response = await httpClient.GetAsync(url);
+            if (response.IsSuccessStatusCode) {
+                string jsonString = await response.Content.ReadAsStringAsync();
+                Console.WriteLine(jsonString);
+                dynamic summonerData = JsonConvert.DeserializeObject(jsonString);
+                return summonerData.id;
+            }
+            else {
+                Console.WriteLine($"Error fetching summoner data: {response.StatusCode}");
+                Console.WriteLine(await response.Content.ReadAsStringAsync());
+                return null;
+            }
+        }
+        */
+
+        public async Task<LeagueEntryDTO> GetRank(string puuid) {
+            string url = $"https://na1.api.riotgames.com/lol/league/v4/entries/by-puuid/{puuid}";
+
+            HttpResponseMessage response = await httpClient.GetAsync(url);
+            if (response.IsSuccessStatusCode) {
+                string jsonString = await response.Content.ReadAsStringAsync();
+                List<LeagueEntryDTO> entries = JsonConvert.DeserializeObject<List<LeagueEntryDTO>>(jsonString);
+
+                foreach (var entry in entries) {
+                    if (entry.QueueType == "RANKED_SOLO_5x5") { // Ranked Solo / Duo
+                        return entry;
+                    }
+                }
+                Console.WriteLine("No Solo/Duo rank found for this player.");
+                return null;
+            }
+            else {
+                Console.WriteLine($"Error fetching league data: {response.StatusCode}");
+                return null;
+            }
+        }
+    }
+
+    // entry for a player's league stats
+    public  class LeagueEntryDTO {
+        [JsonProperty("queueType")]
+        public string QueueType { get; set; }
+
+        [JsonProperty("tier")]
+        public string Tier { get; set; }
+
+        [JsonProperty("rank")]
+        public string Rank { get; set; }
+
+        [JsonProperty("leaguePoints")]
+        public int LeaguePoints { get; set; }
+
+        [JsonProperty("wins")]
+        public int Wins { get; set; }
+
+        [JsonProperty("losses")]
+        public int Losses { get; set; }
     }
 
     // data transfer object to hold received account information

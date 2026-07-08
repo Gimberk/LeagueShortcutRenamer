@@ -4,6 +4,7 @@ using System;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Threading;
@@ -29,6 +30,7 @@ namespace LSR {
         private bool leagueRunning = false;
 
         public readonly DispatcherTimer leagueTimer = new DispatcherTimer();
+        public readonly DispatcherTimer rankTimer   = new DispatcherTimer();
 
         #region Instance Management
 
@@ -105,14 +107,63 @@ namespace LSR {
             leagueTimer.Interval = TimeSpan.FromMinutes(2);
             leagueTimer.Tick += TimerTick;
             leagueTimer.Start();
+            TimerTick(null, null);
+
+            // initiate the dispatch timer to fetch player rank when league is open
+            rankTimer.Interval = TimeSpan.FromSeconds(5);
+            rankTimer.Tick += RankTimerTick;
+            rankTimer.Start();
 
             // Run the initialization set ups
             this.Loaded += Main_Win_Loaded;
         }
 
+        private void TimerTick(object sender, EventArgs e) { leagueRunning = Utility.CheckLeagueRunning(); }
+
+        private async void RankTimerTick(object sender, EventArgs e) {
+            // reduce API requests per minute by only querying if league is open
+            if (!leagueRunning || !running || currentFormat != ShortcutFormat.LP) return;
+
+            LeagueEntryDTO account = await GetPlayerRank();
+            string shortcut = GetShortcutPath();
+            string name = account.Tier == "GOLD" ? $"Still silver {account.Rank}... Get back to work boi!" : $"{account.Tier} {account.Rank} - {account.LeaguePoints} LP";
+            string newShortcut = Path.Combine(new FileInfo(shortcut).DirectoryName, name + ".lnk");
+            File.Move(shortcut, newShortcut);
+
+            string[] lines = File.ReadAllLines(configFile);
+            lines[0] = newShortcut;
+            File.WriteAllLines(configFile, lines);
+            UpdatePathLbl();
+        }
+
+
+        private string GetShortcutPath() {
+            if (File.Exists(configFile) && new FileInfo(configFile).Length > 0 && File.ReadAllLines(configFile).Length == 3)
+                return File.ReadAllLines(configFile)[0];
+            throw new InvalidDataException("Must have valid shortcut path to enable LSR");
+        }
+
         private bool IsPlayerInfoValid() {
             if (!File.Exists(playerFile) || new FileInfo(playerFile).Length == 0) return false;
             return File.ReadAllLines(playerFile)[0] == "True";
+        }
+
+        private string GetPUUID() {
+            return IsPlayerInfoValid() ? File.ReadAllLines(playerFile)[4] : string.Empty;
+        }
+
+        private string GetAPIKey() {
+            return IsPlayerInfoValid() ? File.ReadAllLines(playerFile)[3] : string.Empty;
+        }
+        
+        private async Task<LeagueEntryDTO> GetPlayerRank() {
+            if (!IsPlayerInfoValid()) throw new InvalidDataException("Must Have Valid Player Info to Access Rank");
+
+            RiotAccountService accountServicer = new RiotAccountService(GetAPIKey());
+            string puuid = GetPUUID();
+            LeagueEntryDTO rankFormatted = await accountServicer.GetRank(puuid);
+
+            return rankFormatted;
         }
 
         private void ShowLegalBoilerplate() {
@@ -122,10 +173,6 @@ namespace LSR {
         private void ClearWorkingDirectory()
         {
             Directory.Delete(Directory.GetCurrentDirectory() + @"\config", true);
-        }
-
-        private void TimerTick(object sender, EventArgs e) {
-            leagueRunning = Utility.CheckLeagueRunning();
         }
 
         private void UpdatePathLbl() {
@@ -150,6 +197,8 @@ namespace LSR {
             {
                 Owner = this
             };
+
+            EnableBtn.IsEnabled = (currentFormat != ShortcutFormat.None && File.Exists(configFile) && new FileInfo(configFile).Length > 0 && File.ReadAllLines(configFile).Length == 3);
 
             if (!File.Exists(configFile)) File.Create(configFile);
             else UpdatePathLbl();
@@ -177,6 +226,8 @@ namespace LSR {
                         currentFormat = ShortcutFormat.None;
                         break;
                 }
+
+                EnableBtn.IsEnabled = (currentFormat != ShortcutFormat.None && File.Exists(configFile) && new FileInfo(configFile).Length > 0 && File.ReadAllLines(configFile).Length == 3);
             }
         }
 
@@ -185,6 +236,7 @@ namespace LSR {
 
             UpdatePathLbl();
             UpdatePlayerLbl();
+            EnableBtn.IsEnabled = (File.Exists(configFile) && new FileInfo(configFile).Length > 0 && File.ReadAllLines(configFile)[2] == "True");
         }
 
         private void EnableBtn_Click(object sender, RoutedEventArgs e)
@@ -211,13 +263,13 @@ namespace LSR {
 
         private void DisableBtn_Click(object sender, RoutedEventArgs e)
         {
-            running = false;
-            EnableBtn.IsEnabled = true;
-            DisableBtn.IsEnabled = false;
+            running                     = false;
+            EnableBtn.IsEnabled         = true;
+            DisableBtn.IsEnabled        = false;
 
-            LP.IsEnabled = true;
-            MOTD.IsEnabled = true;
-            None.IsEnabled = true;
+            LP.IsEnabled                = true;
+            MOTD.IsEnabled              = false;
+            None.IsEnabled              = true;
         }
 
         private void ShowLegalBtn_Click(object sender, RoutedEventArgs e) {

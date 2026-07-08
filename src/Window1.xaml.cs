@@ -124,7 +124,7 @@ namespace LSR.src {
                 if (result == MessageBoxResult.No) return;
             }
 
-            bool correctPlayerInfo = false;
+            string puuid = string.Empty;
             if (!emptyPlayerInfo) {
                 try {
                     RiotAccountService apiServicer = new RiotAccountService(APIKeyTxt.Text);
@@ -133,7 +133,7 @@ namespace LSR.src {
                         if (MessageBox.Show("Invalid UserID, Tagline, or API Key. Ensure they're correct. Would you like to continue regardless?", "Save Failure", MessageBoxButton.YesNo, MessageBoxImage.Warning) == MessageBoxResult.No) return;
                     }
                     else {
-                        correctPlayerInfo = true;
+                        puuid = attemptedPUUID;
                         MessageBox.Show("Successfully connected Riot account.", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
                     }
                 }
@@ -142,8 +142,8 @@ namespace LSR.src {
                 }
             }
 
-            File.WriteAllText(configFile, shortcut + "\n" + exec);
-            File.WriteAllText(playerFile, correctPlayerInfo.ToString() + "\n" + UserTxt.Text + "\n" + TagTxt.Text + "\n" + APIKeyTxt.Text);
+            File.WriteAllText(configFile, shortcut + "\n" + exec + "\n" + "True");
+            File.WriteAllText(playerFile, (puuid != string.Empty).ToString() + "\n" + UserTxt.Text + "\n" + TagTxt.Text + "\n" + APIKeyTxt.Text + (puuid != string.Empty ? "\n" + puuid : ""));
 
             saved = true;
             Hide();
