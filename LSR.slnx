@@ -1,3 +1,4 @@
 <Solution>
+  <Project Path="../LSRUpdater/LSRUpdater.csproj" Id="8c1b564f-f1be-4c2d-b636-9c54780271dc" />
   <Project Path="LSR.csproj" Id="69a131e5-3049-4adc-bc65-b6597c42a75d" />
 </Solution>

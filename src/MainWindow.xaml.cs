@@ -19,6 +19,8 @@ namespace LSR {
     /// Interaction logic for MainWindow.xaml
     /// </summary>
     public partial class MainWindow : Window {
+        public static readonly src.tools.Version installedVersion = new src.tools.Version(0,2,0);
+
         public readonly bool DEBUG = false;
 
         ShortcutFormat currentFormat;
@@ -117,7 +119,7 @@ namespace LSR {
             TimerTick(null, null);
 
             // initiate the dispatch timer to fetch player rank when league is open
-            rankTimer.Interval = TimeSpan.FromSeconds(5);
+            rankTimer.Interval = TimeSpan.FromMinutes(1);
             rankTimer.Tick += RankTimerTick;
             rankTimer.Start();
 
@@ -189,7 +191,7 @@ namespace LSR {
         }
 
         private void ClearWorkingDirectory() {
-            Directory.Delete(Directory.GetCurrentDirectory() + @"\config", true);
+            Directory.Delete(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "League Shortcut Renamer") + @"\config", true);
             if (File.Exists(startupShortcut)) File.Delete(startupShortcut);
         }
 
@@ -206,7 +208,7 @@ namespace LSR {
             SignedInLbl.Content = valid ? $"Signed in as: {File.ReadAllLines(playerFile)[1]}#{File.ReadAllLines(playerFile)[2]}" : string.Empty;
         }
 
-        private void Main_Win_Loaded(object sender, RoutedEventArgs e) {
+        private async void Main_Win_Loaded(object sender, RoutedEventArgs e) {
             currentFormat = ShortcutFormat.None;
 
             LP.IsEnabled = IsPlayerInfoValid();
@@ -223,6 +225,18 @@ namespace LSR {
 
             if (!File.Exists(playerFile)) File.Create(playerFile);
             UpdatePlayerLbl();
+
+            if (!File.Exists(Utility.versionPath)) Utility.SaveVersion(installedVersion);
+            else {
+                src.tools.Version online = await Utility.GetOnlineVersion(), local = Utility.GetLocalVersion();
+                if (online != local) {
+                    MessageBoxResult result =
+                        MessageBox.Show($"There is a new version of League Shortcut Renamer Available:\n\tLocal Version: {local};\n\tNewest Version: {online}", "Update LSR?", MessageBoxButton.YesNo, MessageBoxImage.Question);
+                    if (result == MessageBoxResult.Yes) {
+
+                    }
+                }
+            }
         }
 
         private void Current_Checked(object sender, RoutedEventArgs e) {
@@ -288,7 +302,7 @@ namespace LSR {
             None.IsEnabled = true;
         }
 
-        private void ShowLegalBtn_Click(object sender, RoutedEventArgs e) {
+        private async void ShowLegalBtn_Click(object sender, RoutedEventArgs e) {
             ShowLegalBoilerplate();
         }
     }

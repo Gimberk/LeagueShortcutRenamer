@@ -1,12 +1,52 @@
-﻿using System;
+﻿using IWshRuntimeLibrary;
+using Newtonsoft.Json;
+using System;
+using System.Collections.Generic;
 using System.Diagnostics;
-using IWshRuntimeLibrary;
 using System.IO;
+using System.Net.Http;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+using System.Windows.Navigation;
 
 namespace LSR.src.tools
 {
+    public struct Version {
+        public readonly int major, minor, revision;
+
+        public Version(int major, int minor, int revision) {
+            this.major      = major;
+            this.minor      = minor;
+            this.revision   = revision;
+        }
+
+        public override string ToString() {
+            return $"{major}.{minor}.{revision}";
+        }
+
+        public static bool operator ==(Version a, Version b) {
+            return a.Equals(b);
+        }
+
+        public static bool operator !=(Version a, Version b) {
+            return !a.Equals(b);
+        }
+
+        public override bool Equals(object obj) {
+            Version other = (Version)obj;
+            return other.major == major && other.minor == minor && other.revision == revision;
+        }
+
+        public override int GetHashCode() {
+            return HashCode.Combine(major, minor, revision);
+        }
+    }
+
     internal static class Utility
     {
+        public static readonly string versionPath = 
+            Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "League Shortcut Renamer", "version.json");
+
         /// <summary>
         /// Compiles the list of active processes and checks for LeagueClient
         /// </summary>
@@ -39,6 +79,54 @@ namespace LSR.src.tools
                 return null;
             }
             catch (Exception ex) { return ex; }
+        }
+
+        public static async Task<Version> GetOnlineVersion() {
+            string fileUrl = "https://raw.githubusercontent.com/Gimberk/LeagueShortcutRenamer/refs/heads/master/version.json";
+            string destination = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
+
+            try {
+                await DownloadFile(fileUrl, destination);
+                string jsonString = System.IO.File.ReadAllText(destination);
+                string versionString = JsonConvert.DeserializeObject<Dictionary<string, string>>(jsonString)["version"];
+
+                string[] ptr = versionString.ToString().Split('.');
+                System.IO.File.Delete(destination);
+                return new Version(int.Parse(ptr[0]), int.Parse(ptr[1]), int.Parse(ptr[2]));
+            }
+            catch (Exception ex) {
+                MessageBox.Show($"Failed to check online version: {ex.Message}; aborting update check.");
+                return new Version();
+            }
+        }
+
+        public static void SaveVersion(Version v) {
+            System.IO.File.WriteAllText(versionPath, $"{{ \"version\": \"{v.major}.{v.minor}.{v.revision}\" }}");
+        }
+
+        public static Version GetLocalVersion() {
+            string jsonString = System.IO.File.ReadAllText(versionPath);
+            string versionString = JsonConvert.DeserializeObject<Dictionary<string, string>>(jsonString)["version"];
+
+            string[] ptr = versionString.ToString().Split('.');
+            return new Version(int.Parse(ptr[0]), int.Parse(ptr[1]), int.Parse(ptr[2]));
+        }
+
+        public static async Task DownloadFile(string url, string destination) {
+            HttpClient client = new HttpClient();
+            HttpResponseMessage response = await client.GetAsync(url, HttpCompletionOption.ResponseHeadersRead);
+            response.EnsureSuccessStatusCode();
+
+            Stream downloadStream = await response.Content.ReadAsStreamAsync();
+            FileStream fileStream = new FileStream(destination, FileMode.Create, FileAccess.Write, FileShare.None, 8192, true);
+
+            await downloadStream.CopyToAsync(fileStream);
+
+            // safely close open sockets to prevent memory leaks and access violations
+            client.Dispose();
+            response.Dispose();
+            downloadStream.Close();
+            fileStream.Close();
         }
 
         public static string GetShortcutTarget(string lnkFilePath) {
