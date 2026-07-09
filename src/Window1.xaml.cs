@@ -11,8 +11,6 @@ namespace LSR.src {
     /// Interaction logic for Window1.xaml
     /// </summary>
     public partial class Window1 : Window {
-        private static bool saved = false;
-
         private readonly string configFile;
         private readonly string playerFile;
 
@@ -145,7 +143,6 @@ namespace LSR.src {
             File.WriteAllText(configFile, shortcut + "\n" + exec + "\n" + "True");
             File.WriteAllText(playerFile, (puuid != string.Empty).ToString() + "\n" + UserTxt.Text + "\n" + TagTxt.Text + "\n" + APIKeyTxt.Text + (puuid != string.Empty ? "\n" + puuid : ""));
 
-            saved = true;
             Hide();
         }
 

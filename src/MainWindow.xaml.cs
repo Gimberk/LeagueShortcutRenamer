@@ -2,6 +2,7 @@
 using LSR.src.tools;
 using System;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -25,12 +26,13 @@ namespace LSR {
 
         public readonly string configFile;
         public readonly string playerFile;
+        public readonly string startupShortcut;
 
         private bool running = false;
         private bool leagueRunning = false;
 
         public readonly DispatcherTimer leagueTimer = new DispatcherTimer();
-        public readonly DispatcherTimer rankTimer   = new DispatcherTimer();
+        public readonly DispatcherTimer rankTimer = new DispatcherTimer();
 
         #region Instance Management
 
@@ -95,13 +97,18 @@ namespace LSR {
             InitializeNotifyIcon();
 
             // locate or create the config file for paths
-            string pwd = Directory.GetCurrentDirectory();
-            if (!Directory.Exists(pwd + @"\config")) {
-                Directory.CreateDirectory(pwd + @"\config");
-                ShowLegalBoilerplate();
+            string parentFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "League Shortcut Renamer");
+
+            configFile = parentFolder + @"\config\paths.cfg";
+            playerFile = parentFolder + @"\config\player.cfg";
+            startupShortcut = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Startup), "LeagueShortcutRenamer.lnk");
+
+            if (!Directory.Exists(parentFolder + @"\config")) {
+                Directory.CreateDirectory(parentFolder + @"\config");
+
+                MessageBoxResult result = MessageBox.Show("Would you like to allow League Shortcut Renamer to open when your Windows machine starts?", "Make startup app?", MessageBoxButton.YesNo, MessageBoxImage.Question);
+                if (result == MessageBoxResult.Yes) MakeStartupApp();
             }
-            configFile = pwd + @"\config\paths.cfg";
-            playerFile = pwd + @"\config\player.cfg";
 
             // initiate the dispatch timer to check for league
             leagueTimer.Interval = TimeSpan.FromMinutes(2);
@@ -118,6 +125,16 @@ namespace LSR {
             this.Loaded += Main_Win_Loaded;
         }
 
+        private void MakeStartupApp() {
+            string exe = Process.GetCurrentProcess().MainModule.FileName;
+
+            var shell = new IWshRuntimeLibrary.WshShell();
+            var shortcut = (IWshRuntimeLibrary.IWshShortcut)shell.CreateShortcut(startupShortcut);
+
+            shortcut.TargetPath = exe;
+            shortcut.Save();
+        }
+
         private void TimerTick(object sender, EventArgs e) { leagueRunning = Utility.CheckLeagueRunning(); }
 
         private async void RankTimerTick(object sender, EventArgs e) {
@@ -126,8 +143,9 @@ namespace LSR {
 
             LeagueEntryDTO account = await GetPlayerRank();
             string shortcut = GetShortcutPath();
-            string name = account.Tier == "GOLD" ? $"Still silver {account.Rank}... Get back to work boi!" : $"{account.Tier} {account.Rank} - {account.LeaguePoints} LP";
-            string newShortcut = Path.Combine(new FileInfo(shortcut).DirectoryName, name + ".lnk");
+            string name = account.Tier == "SILVER" ? $"Still silver {account.Rank} huh... Get to grinding boi!" : $"{account.Tier} {account.Rank} - {account.LeaguePoints} LP";
+            string newShortcut = Path.Combine(Path.GetDirectoryName(shortcut), name + ".lnk");
+
             File.Move(shortcut, newShortcut);
 
             string[] lines = File.ReadAllLines(configFile);
@@ -155,7 +173,7 @@ namespace LSR {
         private string GetAPIKey() {
             return IsPlayerInfoValid() ? File.ReadAllLines(playerFile)[3] : string.Empty;
         }
-        
+
         private async Task<LeagueEntryDTO> GetPlayerRank() {
             if (!IsPlayerInfoValid()) throw new InvalidDataException("Must Have Valid Player Info to Access Rank");
 
@@ -170,9 +188,9 @@ namespace LSR {
             MessageBox.Show("League Shortcut Renamer is not endorsed by Riot Games and does not reflect the views or opinions of Riot Games or anyone officially involved in producing or managing Riot Games properties. Riot Games and all associated properties are trademarks or registered trademarks of Riot Games, Inc", "Legal Jibber Jabber", MessageBoxButton.OK, MessageBoxImage.Information);
         }
 
-        private void ClearWorkingDirectory()
-        {
+        private void ClearWorkingDirectory() {
             Directory.Delete(Directory.GetCurrentDirectory() + @"\config", true);
+            if (File.Exists(startupShortcut)) File.Delete(startupShortcut);
         }
 
         private void UpdatePathLbl() {
@@ -239,10 +257,9 @@ namespace LSR {
             EnableBtn.IsEnabled = (File.Exists(configFile) && new FileInfo(configFile).Length > 0 && File.ReadAllLines(configFile)[2] == "True");
         }
 
-        private void EnableBtn_Click(object sender, RoutedEventArgs e)
-        {
+        private void EnableBtn_Click(object sender, RoutedEventArgs e) {
             if (PathLbl.Content.ToString().Trim() == "None") {
-                MessageBox.Show("Cannot enable LSR: Missing account and/or shortcut path; visit the necessary settings to update this.", 
+                MessageBox.Show("Cannot enable LSR: Missing account and/or shortcut path; visit the necessary settings to update this.",
                     "Start Failure", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
@@ -261,15 +278,14 @@ namespace LSR {
             None.IsEnabled = false;
         }
 
-        private void DisableBtn_Click(object sender, RoutedEventArgs e)
-        {
-            running                     = false;
-            EnableBtn.IsEnabled         = true;
-            DisableBtn.IsEnabled        = false;
+        private void DisableBtn_Click(object sender, RoutedEventArgs e) {
+            running = false;
+            EnableBtn.IsEnabled = true;
+            DisableBtn.IsEnabled = false;
 
-            LP.IsEnabled                = true;
-            MOTD.IsEnabled              = false;
-            None.IsEnabled              = true;
+            LP.IsEnabled = true;
+            MOTD.IsEnabled = false;
+            None.IsEnabled = true;
         }
 
         private void ShowLegalBtn_Click(object sender, RoutedEventArgs e) {
