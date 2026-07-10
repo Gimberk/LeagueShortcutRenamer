@@ -15,6 +15,19 @@ namespace LSR
     /// </summary>
     public partial class App : Application
     {
+        public App() {
+            this.DispatcherUnhandledException += (s, e) =>
+            {
+                MessageBox.Show(e.Exception.ToString());
+                e.Handled = true;
+            };
+
+            AppDomain.CurrentDomain.UnhandledException += (s, e) =>
+            {
+                MessageBox.Show(e.ExceptionObject.ToString());
+            };
+        }
+
         private static Mutex mutex = null;
         private const string UniqueAppName = "Global\\LSR";
 

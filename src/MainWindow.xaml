@@ -19,8 +19,9 @@
         <Button x:Name="DisableBtn" Content="Disable" Margin="27,345,585,26" FontSize="24" Foreground="#FFD02222" IsEnabled="False" Click="DisableBtn_Click"/>
         <RadioButton x:Name="LP" Content="Current League O' Legends LP" Margin="27,178,0,0" FontFamily="Franklin Gothic Medium" FontSize="16" Foreground="White" Checked="Current_Checked" HorizontalAlignment="Left" VerticalAlignment="Top" Width="230" Height="17"/>
         <RadioButton x:Name="None" Content="None (Sets to standard)" Margin="27,226,0,0" FontFamily="Franklin Gothic Medium" FontSize="16" Foreground="White" Checked="Current_Checked" HorizontalAlignment="Left" VerticalAlignment="Top" Width="180" Height="17"/>
-        <RadioButton x:Name="MOTD" Content="Message of the day (MOTD) from yours truly!" Margin="27,202,0,0" FontFamily="Franklin Gothic Medium" FontSize="16" Foreground="White" Checked="Current_Checked" HorizontalAlignment="Left" VerticalAlignment="Top" Width="323" Height="17" IsEnabled="False"/>
+        <RadioButton x:Name="MOTD" Content="Message of the day (MOTD) from yours truly! (Not implemented)" Margin="27,202,0,0" FontFamily="Franklin Gothic Medium" FontSize="16" Foreground="White" Checked="Current_Checked" HorizontalAlignment="Left" VerticalAlignment="Top" Width="459" Height="17" IsEnabled="False"/>
         <Label x:Name="SignedInLbl" Content="Signed In As: xHekpo3ma#yes" Foreground="White" Margin="247,351,0,0" FontFamily="Franklin Gothic Medium" FontSize="26" HorizontalAlignment="Left" VerticalAlignment="Top" Height="43" Width="570"/>
         <Button x:Name="ShowLegalBtn" Content="Show Legal Boilerplate" Margin="615,86,0,0" Click="ShowLegalBtn_Click" Width="174" Height="43" VerticalAlignment="Top" HorizontalAlignment="Left" FontSize="16" Background="#FF917BFF" BorderBrush="#FF5647A0"/>
+        <Label x:Name="versionLbl" Content="Version null" Foreground="White" FontFamily="Franklin Gothic Medium" HorizontalAlignment="Right" VerticalAlignment="Bottom" Width="93" Height="24" Margin="0,0,0,4"/>
     </Grid>
 </Window>

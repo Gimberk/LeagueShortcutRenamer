@@ -108,7 +108,7 @@ namespace LSR.src.tools
             string jsonString = System.IO.File.ReadAllText(versionPath);
             string versionString = JsonConvert.DeserializeObject<Dictionary<string, string>>(jsonString)["version"];
 
-            string[] ptr = versionString.ToString().Split('.');
+            string[] ptr = versionString.Split('.');
             return new Version(int.Parse(ptr[0]), int.Parse(ptr[1]), int.Parse(ptr[2]));
         }
 

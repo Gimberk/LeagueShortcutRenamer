@@ -19,7 +19,7 @@ namespace LSR {
     /// Interaction logic for MainWindow.xaml
     /// </summary>
     public partial class MainWindow : Window {
-        public static readonly src.tools.Version installedVersion = new src.tools.Version(0,2,0);
+        public static readonly src.tools.Version installedVersion = new src.tools.Version(1,0,0);
 
         public readonly bool DEBUG = false;
 
@@ -113,13 +113,13 @@ namespace LSR {
             }
 
             // initiate the dispatch timer to check for league
-            leagueTimer.Interval = TimeSpan.FromMinutes(2);
+            leagueTimer.Interval = TimeSpan.FromMinutes(1);
             leagueTimer.Tick += TimerTick;
             leagueTimer.Start();
             TimerTick(null, null);
 
-            // initiate the dispatch timer to fetch player rank when league is open
-            rankTimer.Interval = TimeSpan.FromMinutes(1);
+            // initiate the dispatch timer to fetch player rank if league is open
+            rankTimer.Interval = TimeSpan.FromMinutes(2);
             rankTimer.Tick += RankTimerTick;
             rankTimer.Start();
 
@@ -191,7 +191,7 @@ namespace LSR {
         }
 
         private void ClearWorkingDirectory() {
-            Directory.Delete(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "League Shortcut Renamer") + @"\config", true);
+            Directory.Delete(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "League Shortcut Renamer"), true);
             if (File.Exists(startupShortcut)) File.Delete(startupShortcut);
         }
 
@@ -229,14 +229,32 @@ namespace LSR {
             if (!File.Exists(Utility.versionPath)) Utility.SaveVersion(installedVersion);
             else {
                 src.tools.Version online = await Utility.GetOnlineVersion(), local = Utility.GetLocalVersion();
+                MessageBox.Show($"{online}\n{local}");
                 if (online != local) {
                     MessageBoxResult result =
-                        MessageBox.Show($"There is a new version of League Shortcut Renamer Available:\n\tLocal Version: {local};\n\tNewest Version: {online}", "Update LSR?", MessageBoxButton.YesNo, MessageBoxImage.Question);
+                        MessageBox.Show($"There is a new version of League Shortcut Renamer Available:\n\tLocal Version: {local};\n\tNewest Version: {online};\nWould you like to update now?", "Update LSR?", MessageBoxButton.YesNo, MessageBoxImage.Question);
                     if (result == MessageBoxResult.Yes) {
-
+                        // update
+                        try {
+                            Process.Start(new ProcessStartInfo
+                            {
+                                FileName = "LSRUpdater.exe",
+                                UseShellExecute = true,
+                                Verb = "runas" // gives the program admin privileges
+                            });
+                            Application.Current.Shutdown();
+                        }
+                        catch (Win32Exception ex) when (ex.NativeErrorCode == 1223) {
+                            MessageBox.Show("Administrative privileges are required for the LSRUpdater", "Update Failed - User permissions", MessageBoxButton.OK, MessageBoxImage.Warning);
+                        }
+                        catch (Exception ex) {
+                            MessageBox.Show($"Failed to start updater:\n{ex.Message}", "Update Failed", MessageBoxButton.OK, MessageBoxImage.Error);
+                        }
                     }
                 }
             }
+
+            versionLbl.Content = $"Version {Utility.GetLocalVersion()}";
         }
 
         private void Current_Checked(object sender, RoutedEventArgs e) {
