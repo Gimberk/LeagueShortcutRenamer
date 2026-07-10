@@ -241,6 +241,9 @@ namespace LSR {
                                 UseShellExecute = true,
                                 Verb = "runas" // gives the program admin privileges
                             });
+
+                            // close this instance; LSRUpdater waits for exit
+                            isExplicitClose = true;
                             Application.Current.Shutdown();
                         }
                         catch (Win32Exception ex) when (ex.NativeErrorCode == 1223) {
