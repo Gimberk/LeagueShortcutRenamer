@@ -19,7 +19,7 @@ namespace LSR {
     /// Interaction logic for MainWindow.xaml
     /// </summary>
     public partial class MainWindow : Window {
-        public static readonly src.tools.Version installedVersion = new src.tools.Version(1,0,0);
+        public static readonly src.tools.Version installedVersion = new src.tools.Version(1,0,1);
 
         public readonly bool DEBUG = false;
 
@@ -76,7 +76,7 @@ namespace LSR {
 
             if (!isExplicitClose) {
                 e.Cancel = true;
-                this.WindowState = WindowState.Minimized;
+                Hide();
             }
             else {
                 notifyIcon.Dispose();
@@ -229,7 +229,6 @@ namespace LSR {
             if (!File.Exists(Utility.versionPath)) Utility.SaveVersion(installedVersion);
             else {
                 src.tools.Version online = await Utility.GetOnlineVersion(), local = Utility.GetLocalVersion();
-                MessageBox.Show($"{online}\n{local}");
                 if (online != local) {
                     MessageBoxResult result =
                         MessageBox.Show($"There is a new version of League Shortcut Renamer Available:\n\tLocal Version: {local};\n\tNewest Version: {online};\nWould you like to update now?", "Update LSR?", MessageBoxButton.YesNo, MessageBoxImage.Question);

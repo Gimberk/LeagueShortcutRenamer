@@ -88,6 +88,7 @@ namespace LSR.src.tools
             try {
                 await DownloadFile(fileUrl, destination);
                 string jsonString = System.IO.File.ReadAllText(destination);
+                Console.WriteLine(jsonString);
                 string versionString = JsonConvert.DeserializeObject<Dictionary<string, string>>(jsonString)["version"];
 
                 string[] ptr = versionString.ToString().Split('.');
